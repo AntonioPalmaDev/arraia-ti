@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cardapio: {
+        Row: {
+          categoria: string
+          created_at: string
+          descricao: string | null
+          emoji: string
+          id: string
+          nome: string
+          responsavel: string | null
+          updated_at: string
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          descricao?: string | null
+          emoji: string
+          id?: string
+          nome: string
+          responsavel?: string | null
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          descricao?: string | null
+          emoji?: string
+          id?: string
+          nome?: string
+          responsavel?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
