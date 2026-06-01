@@ -38,6 +38,12 @@ function Arraia() {
 
   const updateResponsavel = useMutation({
     mutationFn: async ({ id, responsavel }: { id: string; responsavel: string }) => {
+      const token = prompt("Insira o token para salvar as mudanças:");
+      if (token !== "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS") {
+        alert("Token inválido! Ocê não tem permissão pra mexer aqui não.");
+        throw new Error("Invalid token");
+      }
+
       const { error } = await supabase
         .from("cardapio")
         .update({ responsavel })
