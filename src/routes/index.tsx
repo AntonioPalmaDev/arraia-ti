@@ -146,17 +146,6 @@ function Arraia() {
           </section>
         )}
 
-        <section className="mt-16 rounded-3xl border-2 border-foreground bg-accent/90 p-8 text-center text-accent-foreground shadow-[8px_8px_0_var(--color-foreground)]">
-          <h2 className="font-display text-4xl">🪗 Programação da Festança</h2>
-          <ul className="mt-4 grid gap-2 font-body text-2xl sm:grid-cols-3">
-            <li>19h — Abertura da fogueira 🔥</li>
-            <li>20h — Quadrilha dos Devs 💃🕺</li>
-            <li>21h — Casamento Caipira 💍</li>
-            <li>22h — Pescaria de bugs 🎣🐛</li>
-            <li>23h — Show do sanfoneiro 🪗</li>
-            <li>00h — Fogos e abraços 🎆</li>
-          </ul>
-        </section>
 
         <div className="mt-12 checker-border h-6 rounded-full border-2 border-foreground" />
 
