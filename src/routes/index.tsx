@@ -52,6 +52,13 @@ function Arraia() {
   });
 
   const handleStartEditing = (id: string, currentResponsavel: string) => {
+    // Se estiver vazio, deixa editar sem token
+    if (!currentResponsavel) {
+      setEditingId(id);
+      setTempName("");
+      return;
+    }
+
     const token = prompt("Insira o token para alterar o nome:");
     if (token === "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS") {
       setEditingId(id);
