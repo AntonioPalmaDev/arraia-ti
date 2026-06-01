@@ -38,12 +38,6 @@ function Arraia() {
 
   const updateResponsavel = useMutation({
     mutationFn: async ({ id, responsavel }: { id: string; responsavel: string }) => {
-      const token = prompt("Insira o token para salvar as mudanças:");
-      if (token !== "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS") {
-        alert("Token inválido! Ocê não tem permissão pra mexer aqui não.");
-        throw new Error("Invalid token");
-      }
-
       const { error } = await supabase
         .from("cardapio")
         .update({ responsavel })
@@ -56,6 +50,16 @@ function Arraia() {
       setTempName("");
     },
   });
+
+  const handleStartEditing = (id: string, currentResponsavel: string) => {
+    const token = prompt("Insira o token para alterar o nome:");
+    if (token === "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS") {
+      setEditingId(id);
+      setTempName(currentResponsavel);
+    } else if (token !== null) {
+      alert("Token inválido! Ocê não tem permissão pra mexer aqui não.");
+    }
+  };
 
   const handleSave = (id: string) => {
     updateResponsavel.mutate({ id, responsavel: tempName });
@@ -132,10 +136,7 @@ function Arraia() {
                     </div>
                   ) : (
                     <div 
-                      onClick={() => {
-                        setEditingId(c.id);
-                        setTempName(c.responsavel || "");
-                      }}
+                      onClick={() => handleStartEditing(c.id, c.responsavel || "")}
                       className="cursor-pointer group/name relative flex items-center justify-between rounded-lg border-2 border-transparent bg-secondary/20 px-3 py-1 font-body text-2xl text-foreground transition-all hover:border-foreground/50 hover:bg-secondary/40"
                     >
                       <span className={c.responsavel ? "text-primary" : "text-foreground/40 italic text-xl"}>
