@@ -89,11 +89,18 @@ function Arraia() {
         .from("cardapio")
         .delete()
         .eq("id", id);
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Erro do Supabase:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cardapio"] });
     },
+    onError: (error: any) => {
+      alert("Ops! Erro ao tentar excluir: " + error.message);
+    }
   });
 
   const handleStartEditing = (id: string, currentResponsavel: string) => {
@@ -124,7 +131,6 @@ function Arraia() {
     addPrato.mutate({ nome: novoPratoNome, responsavel: novoPratoResponsavel });
   };
 
-  // Função que lida com a exclusão validando o token
   const handleDeletePrato = (id: string, nomePrato: string) => {
     const token = prompt(`Insira o token para excluir o prato "${nomePrato}":`);
     
@@ -168,18 +174,21 @@ function Arraia() {
                   {c.categoria}
                 </div>
 
-                {/* BOTÃO DE EXCLUIR PROTEGIDO POR TOKEN (Só aparece para pratos da categoria "Outros") */}
+                {/* BOTÃO DE EXCLUIR AJUSTADO MAIS PARA BAIXO (FICA DENTRO DO CARD AGORA) */}
                 {c.categoria === "Outros" && (
                   <button
-                    onClick={() => handleDeletePrato(c.id, c.nome)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePrato(c.id, c.nome);
+                    }}
                     title="Excluir prato"
-                    className="absolute -top-3 right-4 rounded-full border-2 border-foreground bg-destructive px-2 py-0.5 text-xs font-bold uppercase text-destructive-foreground hover:scale-105 transition-transform"
+                    className="absolute top-3 right-4 rounded-full border-2 border-foreground bg-destructive px-2 py-0.5 text-xs font-bold uppercase text-destructive-foreground hover:scale-105 transition-transform"
                   >
                     🗑️ Excluir
                   </button>
                 )}
                 
-                <div className="flex items-start gap-3 mt-2">
+                <div className="flex items-start gap-3 mt-4">
                   <span className="text-5xl flicker" aria-hidden>{c.emoji}</span>
                   <div className="flex-1">
                     <h2 className="font-display text-2xl text-primary leading-tight">{c.nome}</h2>
