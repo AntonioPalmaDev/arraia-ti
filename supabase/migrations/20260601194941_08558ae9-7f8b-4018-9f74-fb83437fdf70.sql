@@ -21,7 +21,6 @@ GRANT ALL ON public.cardapio TO service_role;
 CREATE POLICY "Anyone can view the cardapio" ON public.cardapio FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert into cardapio" ON public.cardapio FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can update responsavel" ON public.cardapio FOR UPDATE USING (true);
-
 -- Function to update timestamp
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER AS $$

@@ -21,9 +21,17 @@ export const Route = createFileRoute("/")({
 
 function Arraia() {
   const queryClient = useQueryClient();
+  const TOKEN_CORRETO = "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS";
+  
+  // Estados para edição dos cards existentes
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempName, setTempName] = useState("");
 
+  // Estados para a criação do NOVO prato extra
+  const [novoPratoNome, setNovoPratoNome] = useState("");
+  const [novoPratoResponsavel, setNovoPratoResponsavel] = useState("");
+
+  // Busca a lista de pratos
   const { data: cardapio, isLoading } = useQuery({
     queryKey: ["cardapio"],
     queryFn: async () => {
@@ -37,6 +45,7 @@ function Arraia() {
     },
   });
 
+  // Mutation para atualizar o responsável por um prato
   const updateResponsavel = useMutation({
     mutationFn: async ({ id, responsavel }: { id: string; responsavel: string }) => {
       const { error } = await supabase
@@ -52,8 +61,42 @@ function Arraia() {
     },
   });
 
+  // Mutation para criar um NOVO prato extra
+  const addPrato = useMutation({
+    mutationFn: async ({ nome, responsavel }: { nome: string; responsavel: string }) => {
+      const { error } = await supabase
+        .from("cardapio")
+        .insert({
+          nome,
+          responsavel,
+          categoria: "Outros",
+          emoji: "🍽️",
+          descricao: "Prato extra sugerido pela galera!"
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cardapio"] });
+      setNovoPratoNome("");
+      setNovoPratoResponsavel("");
+    },
+  });
+
+  // Mutation para EXCLUIR um prato
+  const deletePrato = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("cardapio")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cardapio"] });
+    },
+  });
+
   const handleStartEditing = (id: string, currentResponsavel: string) => {
-    // Se estiver vazio, deixa editar sem token
     if (!currentResponsavel) {
       setEditingId(id);
       setTempName("");
@@ -61,7 +104,7 @@ function Arraia() {
     }
 
     const token = prompt("Insira o token para alterar o nome:");
-    if (token === "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS") {
+    if (token === TOKEN_CORRETO) {
       setEditingId(id);
       setTempName(currentResponsavel);
     } else if (token !== null) {
@@ -71,6 +114,27 @@ function Arraia() {
 
   const handleSave = (id: string) => {
     updateResponsavel.mutate({ id, responsavel: tempName });
+  };
+
+  const handleAddNovoPrato = () => {
+    if (!novoPratoNome.trim()) {
+      alert("Ocê precisa dar um nome pro prato pra poder colocar na mesa!");
+      return;
+    }
+    addPrato.mutate({ nome: novoPratoNome, responsavel: novoPratoResponsavel });
+  };
+
+  // Função que lida com a exclusão validando o token
+  const handleDeletePrato = (id: string, nomePrato: string) => {
+    const token = prompt(`Insira o token para excluir o prato "${nomePrato}":`);
+    
+    if (token === TOKEN_CORRETO) {
+      if (confirm(`Tem certeza que deseja tirar o prato "${nomePrato}" da mesa?`)) {
+        deletePrato.mutate(id);
+      }
+    } else if (token !== null) {
+      alert("Token inválido! Ocê não pode retirar esse prato da mesa não.");
+    }
   };
 
   return (
@@ -103,8 +167,19 @@ function Arraia() {
                 <div className="absolute -top-3 left-4 rounded-full border-2 border-foreground bg-secondary px-3 py-0.5 text-xs font-bold uppercase tracking-wider">
                   {c.categoria}
                 </div>
+
+                {/* BOTÃO DE EXCLUIR PROTEGIDO POR TOKEN (Só aparece para pratos da categoria "Outros") */}
+                {c.categoria === "Outros" && (
+                  <button
+                    onClick={() => handleDeletePrato(c.id, c.nome)}
+                    title="Excluir prato"
+                    className="absolute -top-3 right-4 rounded-full border-2 border-foreground bg-destructive px-2 py-0.5 text-xs font-bold uppercase text-destructive-foreground hover:scale-105 transition-transform"
+                  >
+                    🗑️ Excluir
+                  </button>
+                )}
                 
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 mt-2">
                   <span className="text-5xl flicker" aria-hidden>{c.emoji}</span>
                   <div className="flex-1">
                     <h2 className="font-display text-2xl text-primary leading-tight">{c.nome}</h2>
@@ -158,9 +233,56 @@ function Arraia() {
                 </div>
               </article>
             ))}
+
+            {/* CARD PARA ADICIONAR NOVO PRATO */}
+            <article className="group relative rounded-2xl border-4 border-dashed border-foreground/30 bg-card/60 p-5 transition-transform hover:-translate-y-1 hover:rotate-[0.5deg]">
+              <div className="absolute -top-3 left-4 rounded-full border-2 border-foreground bg-primary px-3 py-0.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
+                Sugerir Extra
+              </div>
+              
+              <div className="flex flex-col h-full gap-4 pt-3">
+                <div>
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+                    Nome do Prato
+                  </label>
+                  <input
+                    type="text"
+                    value={novoPratoNome}
+                    onChange={(e) => setNovoPratoNome(e.target.value)}
+                    placeholder="Ex: Torta de Frango"
+                    className="w-full rounded-lg border-2 border-foreground bg-background px-3 py-2 font-body text-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-1 block">
+                    Quem traz (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={novoPratoResponsavel}
+                    onChange={(e) => setNovoPratoResponsavel(e.target.value)}
+                    placeholder="Seu nome"
+                    className="w-full rounded-lg border-2 border-foreground bg-background px-3 py-2 font-body text-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddNovoPrato();
+                    }}
+                  />
+                </div>
+
+                <div className="mt-auto pt-4 border-t-2 border-dashed border-foreground/20">
+                  <button
+                    onClick={handleAddNovoPrato}
+                    disabled={addPrato.isPending}
+                    className="w-full rounded-lg bg-primary px-4 py-2 font-body text-xl text-primary-foreground font-bold hover:brightness-110 disabled:opacity-50 border-2 border-foreground shadow-[4px_4px_0_var(--color-foreground)] active:translate-y-1 active:shadow-none transition-all"
+                  >
+                    {addPrato.isPending ? "Criando..." : "Adicionar na Mesa ➕"}
+                  </button>
+                </div>
+              </div>
+            </article>
           </section>
         )}
-
 
         <div className="mt-12 checker-border h-6 rounded-full border-2 border-foreground" />
 
