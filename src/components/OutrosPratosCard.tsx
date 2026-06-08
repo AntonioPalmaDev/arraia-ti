@@ -38,7 +38,7 @@ export function OutrosPratosCard({
         // Atualiza o prato existente
         const { error } = await supabase
           .from("outros_pratos")
-          .update({ prato, responsavel  el })
+          .update({ prato, responsavel })
           .eq("id", pratoId);
 
         if (error) throw error;
