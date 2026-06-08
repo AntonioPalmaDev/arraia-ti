@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { addPratoFn, deletePratoFn, updateResponsavelFn } from "@/lib/cardapio.functions";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -21,11 +24,15 @@ export const Route = createFileRoute("/")({
 
 function Arraia() {
   const queryClient = useQueryClient();
-  const TOKEN_CORRETO = "B4JchR0KHQHEQMzKq2uzsPKgiBLJJKV5c2t9kpWeOSOJhmRQvX1o4UesOLLwyIZS";
-  
+
+  const updateResponsavelServer = useServerFn(updateResponsavelFn);
+  const addPratoServer = useServerFn(addPratoFn);
+  const deletePratoServer = useServerFn(deletePratoFn);
+
   // Estados para edição dos cards existentes
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempName, setTempName] = useState("");
+  const [editingToken, setEditingToken] = useState<string | null>(null);
 
   // Estados para a criação do NOVO prato extra
   const [novoPratoNome, setNovoPratoNome] = useState("");
@@ -47,80 +54,73 @@ function Arraia() {
 
   // Mutation para atualizar o responsável por um prato
   const updateResponsavel = useMutation({
-    mutationFn: async ({ id, responsavel }: { id: string; responsavel: string }) => {
-      const { error } = await supabase
-        .from("cardapio")
-        .update({ responsavel })
-        .eq("id", id);
-      if (error) throw error;
+    mutationFn: async ({ id, responsavel, token }: { id: string; responsavel: string; token: string }) => {
+      await updateResponsavelServer({ data: { id, responsavel, token } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cardapio"] });
       setEditingId(null);
       setTempName("");
+      setEditingToken(null);
+    },
+    onError: (error: any) => {
+      alert("Ops! Erro ao salvar: " + error.message);
     },
   });
 
   // Mutation para criar um NOVO prato extra
   const addPrato = useMutation({
-    mutationFn: async ({ nome, responsavel }: { nome: string; responsavel: string }) => {
-      const { error } = await supabase
-        .from("cardapio")
-        .insert({
-          nome,
-          responsavel,
-          categoria: "Outros",
-          emoji: "🍽️",
-          descricao: "Prato extra sugerido pela galera!"
-        });
-      if (error) throw error;
+    mutationFn: async ({ nome, responsavel, token }: { nome: string; responsavel: string; token: string }) => {
+      await addPratoServer({ data: { nome, responsavel, token } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cardapio"] });
       setNovoPratoNome("");
       setNovoPratoResponsavel("");
     },
+    onError: (error: any) => {
+      alert("Ops! Erro ao adicionar: " + error.message);
+    },
   });
 
   // Mutation para EXCLUIR um prato
   const deletePrato = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("cardapio")
-        .delete()
-        .eq("id", id);
-      
-      if (error) {
-        console.error("Erro do Supabase:", error);
-        throw error;
-      }
+    mutationFn: async ({ id, token }: { id: string; token: string }) => {
+      await deletePratoServer({ data: { id, token } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cardapio"] });
     },
     onError: (error: any) => {
       alert("Ops! Erro ao tentar excluir: " + error.message);
-    }
+    },
   });
 
   const handleStartEditing = (id: string, currentResponsavel: string) => {
     if (!currentResponsavel) {
       setEditingId(id);
       setTempName("");
+      setEditingToken(null);
       return;
     }
 
     const token = prompt("Insira o token para alterar o nome:");
-    if (token === TOKEN_CORRETO) {
-      setEditingId(id);
-      setTempName(currentResponsavel);
-    } else if (token !== null) {
-      alert("Token inválido! Ocê não tem permissão pra mexer aqui não.");
-    }
+    if (!token) return;
+    setEditingId(id);
+    setTempName(currentResponsavel);
+    setEditingToken(token);
   };
 
   const handleSave = (id: string) => {
-    updateResponsavel.mutate({ id, responsavel: tempName });
+    // Quando não há token (campo estava vazio), passamos string vazia — o servidor rejeita.
+    // Para o caso de campo vazio inicial, pedimos token agora.
+    let token = editingToken;
+    if (!token) {
+      const t = prompt("Insira o token para salvar:");
+      if (!t) return;
+      token = t;
+    }
+    updateResponsavel.mutate({ id, responsavel: tempName, token });
   };
 
   const handleAddNovoPrato = () => {
@@ -128,20 +128,18 @@ function Arraia() {
       alert("Ocê precisa dar um nome pro prato pra poder colocar na mesa!");
       return;
     }
-    addPrato.mutate({ nome: novoPratoNome, responsavel: novoPratoResponsavel });
+    const token = prompt("Insira o token para adicionar um prato:");
+    if (!token) return;
+    addPrato.mutate({ nome: novoPratoNome, responsavel: novoPratoResponsavel, token });
   };
 
   const handleDeletePrato = (id: string, nomePrato: string) => {
     const token = prompt(`Insira o token para excluir o prato "${nomePrato}":`);
-    
-    if (token === TOKEN_CORRETO) {
-      if (confirm(`Tem certeza que deseja tirar o prato "${nomePrato}" da mesa?`)) {
-        deletePrato.mutate(id);
-      }
-    } else if (token !== null) {
-      alert("Token inválido! Ocê não pode retirar esse prato da mesa não.");
-    }
+    if (!token) return;
+    if (!confirm(`Tem certeza que deseja tirar o prato "${nomePrato}" da mesa?`)) return;
+    deletePrato.mutate({ id, token });
   };
+
 
   return (
     <div className="min-h-screen pb-20">
