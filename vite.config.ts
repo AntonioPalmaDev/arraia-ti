@@ -15,15 +15,16 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     server: { entry: "server" },
   },
-  ...(isVercel
-    ? {
-        nitro: {
+  // `noExternal` is a valid Nitro option but is not part of the wrapper's
+  // narrowed type, so we cast. Without it the production Worker crashes with
+  // `No such module "_ssr/tslib"` because Nitro's tracer emits a broken import.
+  nitro: {
+    noExternal: ["tslib"],
+    ...(isVercel
+      ? {
           preset: "vercel",
-          // Vercel Build Output API expects everything under `.vercel/output`.
-          // The vercel preset writes its own `functions/` and `static/` layout
-          // inside this dir, so only override the root.
           output: { dir: ".vercel/output" },
-        },
-      }
-    : {}),
+        }
+      : {}),
+  } as never,
 });
