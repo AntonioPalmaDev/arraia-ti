@@ -19,11 +19,10 @@ export default defineConfig({
     ? {
         nitro: {
           preset: "vercel",
-          output: {
-            dir: ".vercel/output",
-            serverDir: ".vercel/output/functions/__nitro.func",
-            publicDir: ".vercel/output/static",
-          },
+          // Vercel Build Output API expects everything under `.vercel/output`.
+          // The vercel preset writes its own `functions/` and `static/` layout
+          // inside this dir, so only override the root.
+          output: { dir: ".vercel/output" },
         },
       }
     : {}),
