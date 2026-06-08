@@ -1,8 +1,8 @@
 # Deploy na Vercel
 
-Este projeto é TanStack Start. Em CI da Vercel, o build é detectado pela env
-`VERCEL=1` e o `vite.config.ts` ativa o Nitro com preset `vercel`, gerando
-um output serverless que a Vercel serve direto.
+Este projeto é TanStack Start. Em CI da Vercel, o build detecta a env
+`VERCEL=1` automaticamente e o `vite.config.ts` ativa o preset `vercel`,
+gerando o output serverless esperado sem afetar a publicação padrão do Lovable.
 
 ## 1. Subir o código
 
