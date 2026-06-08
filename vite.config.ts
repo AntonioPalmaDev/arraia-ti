@@ -6,8 +6,8 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // When building inside Lovable's sandbox, keep the default Cloudflare bundle.
-// When building elsewhere (e.g. Vercel CI), force Nitro on with the Vercel preset
-// so the output has a serverless function the Vercel runtime can serve.
+// When building on Vercel CI (env VERCEL=1), force Nitro with the Vercel preset
+// and write the output to `.vercel/output` (Vercel Build Output API layout).
 const isVercel = !!process.env.VERCEL;
 
 export default defineConfig({
@@ -19,6 +19,11 @@ export default defineConfig({
     ? {
         nitro: {
           preset: "vercel",
+          output: {
+            dir: ".vercel/output",
+            serverDir: ".vercel/output/functions/__nitro.func",
+            publicDir: ".vercel/output/static",
+          },
         },
       }
     : {}),
