@@ -43,17 +43,15 @@ export const updateResponsavelFn = createServerFn({ method: "POST" })
   });
 
 export const addPratoFn = createServerFn({ method: "POST" })
-  .inputValidator((input: { nome: string; responsavel: string; token: string }) =>
+  .inputValidator((input: { nome: string; responsavel: string }) =>
     z
       .object({
         nome: z.string().trim().min(1).max(80),
         responsavel: z.string().trim().max(80),
-        token: tokenSchema,
       })
       .parse(input),
   )
   .handler(async ({ data }) => {
-    assertToken(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("cardapio").insert({
       nome: data.nome,

@@ -70,8 +70,8 @@ function Arraia() {
 
   // Mutation para criar um NOVO prato extra
   const addPrato = useMutation({
-    mutationFn: async ({ nome, responsavel, token }: { nome: string; responsavel: string; token: string }) => {
-      await addPratoServer({ data: { nome, responsavel, token } });
+    mutationFn: async ({ nome, responsavel }: { nome: string; responsavel: string }) => {
+      await addPratoServer({ data: { nome, responsavel } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cardapio"] });
@@ -128,9 +128,7 @@ function Arraia() {
       alert("Ocê precisa dar um nome pro prato pra poder colocar na mesa!");
       return;
     }
-    const token = prompt("Insira o token para adicionar um prato:");
-    if (!token) return;
-    addPrato.mutate({ nome: novoPratoNome, responsavel: novoPratoResponsavel, token });
+    addPrato.mutate({ nome: novoPratoNome, responsavel: novoPratoResponsavel });
   };
 
   const handleDeletePrato = (id: string, nomePrato: string) => {
