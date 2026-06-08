@@ -15,17 +15,16 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     server: { entry: "server" },
   },
+  // `noExternal` is a valid Nitro option but is not part of the wrapper's
+  // narrowed type, so we cast. Without it the production Worker crashes with
+  // `No such module "_ssr/tslib"` because Nitro's tracer emits a broken import.
   nitro: {
-    // Inline tslib into the SSR bundle. Nitro's tracer was emitting a broken
-    // `_ssr/tslib` import that does not exist (the real chunk is `_libs/tslib`),
-    // causing every published request to crash with `No such module "_ssr/tslib"`.
     noExternal: ["tslib"],
     ...(isVercel
       ? {
           preset: "vercel",
-          // Vercel Build Output API expects everything under `.vercel/output`.
           output: { dir: ".vercel/output" },
         }
       : {}),
-  },
+  } as never,
 });
