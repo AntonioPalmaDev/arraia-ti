@@ -77,18 +77,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Arraia Food Fest is a web application for listing and managing food items for an event." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Arraia Food Fest is a web application for listing and managing food items for an event." },
+      { title: "Arraiá da TI — Lista de Comidas" },
+      { name: "description", content: "Veja o cardápio do Arraiá da TI, descubra quem vai levar cada prato e adicione sua contribuição na festa." },
+      { name: "author", content: "Arraiá da TI" },
+      { property: "og:title", content: "Arraiá da TI — Lista de Comidas" },
+      { property: "og:description", content: "Veja o cardápio do Arraiá da TI, descubra quem vai levar cada prato e adicione sua contribuição na festa." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Arraia Food Fest is a web application for listing and managing food items for an event." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9843cfa5-6556-4f1d-8134-271845a040d6/id-preview-a6fa0f97--0ceabbe9-f431-4214-8c51-de4a6de86643.lovable.app-1780344207644.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/9843cfa5-6556-4f1d-8134-271845a040d6/id-preview-a6fa0f97--0ceabbe9-f431-4214-8c51-de4a6de86643.lovable.app-1780344207644.png" },
+      { name: "twitter:title", content: "Arraiá da TI — Lista de Comidas" },
+      { name: "twitter:description", content: "Veja o cardápio do Arraiá da TI, descubra quem vai levar cada prato e adicione sua contribuição na festa." },
     ],
     links: [
       {
@@ -105,7 +102,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
