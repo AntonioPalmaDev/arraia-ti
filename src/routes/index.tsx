@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { addPratoFn, deletePratoFn, updateResponsavelFn } from "@/lib/cardapio.functions";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
